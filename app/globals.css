@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--app-font);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-whatsapp: var(--whatsapp);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  color-scheme: light;
+  --app-font: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  /* Brand: Petwise red, charcoal, warm off-white */
+  --background: #fbf8f4;
+  --foreground: #1e272e;
+  --card: #ffffff;
+  --card-foreground: #1e272e;
+  --popover: #ffffff;
+  --popover-foreground: #1e272e;
+  --primary: #e2141c;
+  --primary-foreground: #ffffff;
+  --secondary: #1e272e;
+  --secondary-foreground: #ffffff;
+  --muted: #f3ede6;
+  --muted-foreground: #5d666d;
+  --accent: #fde8e8;
+  --accent-foreground: #b30f16;
+  --destructive: #c81e1e;
+  --border: #ebe3da;
+  --input: #e2d9cf;
+  --ring: #e2141c;
+  --whatsapp: #1fa855;
+  --radius: 0.875rem;
+}
+
+html[lang='ar'] {
+  --app-font: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}

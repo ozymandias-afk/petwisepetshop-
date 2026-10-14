@@ -1,0 +1,7 @@
+'use client'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useLanguage } from '@/components/language-provider'
+function Confirmation(){const params=useSearchParams();const {lang}=useLanguage();const n=params.get('number');const ar=lang==='ar';const [wa,setWa]=useState('');useEffect(()=>setWa(sessionStorage.getItem('petwise-last-order-wa')||''),[]);return <div className="mx-auto max-w-xl px-4 py-20 text-center"><div className="mx-auto flex size-16 items-center justify-center rounded-full bg-green-100 text-3xl text-green-700">✓</div><h1 className="mt-5 text-3xl font-extrabold">{ar?'تم استلام طلبك!':'Order received!'}</h1><p className="mt-3 text-muted-foreground">{ar?'رقم الطلب':'Your order number'}: <strong>{n||'—'}</strong></p><p className="mt-2">{ar?'سيتواصل معك فريق PetWise لتأكيد التفاصيل.':'PetWise will contact you to confirm the details.'}</p>{wa&&<a href={wa} target="_blank" rel="noreferrer" className="mt-6 me-2 inline-flex rounded-full bg-[#1fa855] px-6 py-3 font-bold text-white">{ar?'إرسال تفاصيل الطلب للمتجر عبر واتساب':'Send order details to shop on WhatsApp'}</a>}<Link href={`/${lang}/shop`} className="mt-6 inline-flex rounded-full bg-primary px-6 py-3 font-bold text-white">{ar?'متابعة التسوق':'Continue shopping'}</Link></div>}
+export default function Page(){return <Suspense><Confirmation/></Suspense>}
