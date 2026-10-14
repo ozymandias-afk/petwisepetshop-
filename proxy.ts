@@ -1,3 +1,6 @@
-export default function proxy(request: Request) {
-  return new Response("Proxy is working!", { status: 200 });
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+export default function proxy(request: NextRequest) {
+  return NextResponse.next();
 }
