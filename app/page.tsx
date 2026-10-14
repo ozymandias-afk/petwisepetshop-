@@ -1,3 +1,7 @@
 export default function Home() {
-  return <h1>Hello PetWise!</h1>;
+  return (
+    <main>
+      <h1>Welcome to PetWise</h1>
+    </main>
+  );
 }
