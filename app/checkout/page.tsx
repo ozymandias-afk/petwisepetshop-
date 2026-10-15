@@ -207,24 +207,24 @@ export default function CheckoutPage() {
             <div className="mt-2 space-y-1">
               <p>
                 {label('CliQ alias', 'اسم كليك')}:{' '}
-                <strong dir="ltr" className="inline-block">
+                <span dir="ltr" className="inline-block font-bold text-red-600">
                   {process.env.NEXT_PUBLIC_CLIQ_ALIAS ||
                     label('Not configured yet', 'لم يتم الإعداد بعد')}
-                </strong>
+                </span>
               </p>
               <p>
                 {label('IBAN', 'رقم الآيبان')}:{' '}
-                <strong dir="ltr" className="inline-block">
+                <span dir="ltr" className="inline-block font-bold text-red-600">
                   {process.env.NEXT_PUBLIC_BANK_IBAN ||
                     label('Not configured yet', 'لم يتم الإعداد بعد')}
-                </strong>
+                </span>
               </p>
               <p>
                 {label('Account name', 'اسم صاحب الحساب')}:{' '}
-                <strong dir="ltr" className="inline-block">
+                <span dir="ltr" className="inline-block font-bold text-red-600">
                   {process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME ||
                     label('Not configured yet', 'لم يتم الإعداد بعد')}
-                </strong>
+                </span>
               </p>
             </div>
 
@@ -267,6 +267,4 @@ export default function CheckoutPage() {
                     setTransferScreenshot(String(reader.result || ''))
                   reader.readAsDataURL(f)
                 }}
-                className="font-normal"
-              />
-            </label>
+                className="font
