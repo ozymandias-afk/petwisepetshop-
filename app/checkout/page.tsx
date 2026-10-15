@@ -213,17 +213,9 @@ export default function CheckoutPage() {
                 </span>
               </p>
               <p>
-                {label('IBAN', 'رقم الآيبان')}:{' '}
-                <span dir="ltr" className="inline-block font-bold text-red-600">
-                  {process.env.NEXT_PUBLIC_BANK_IBAN ||
-                    label('Not configured yet', 'لم يتم الإعداد بعد')}
-                </span>
-              </p>
-              <p>
                 {label('Account name', 'اسم صاحب الحساب')}:{' '}
                 <span dir="ltr" className="inline-block font-bold text-red-600">
-                  {process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME ||
-                    label('Not configured yet', 'لم يتم الإعداد بعد')}
+                  Tareq Banna
                 </span>
               </p>
             </div>
@@ -267,4 +259,15 @@ export default function CheckoutPage() {
                     setTransferScreenshot(String(reader.result || ''))
                   reader.readAsDataURL(f)
                 }}
-                className="font
+                className="font-normal"
+              />
+            </label>
+          </div>
+        )}
+
+        {form.paymentMethod === 'card' && (
+          <p className="rounded-xl bg-accent p-4 text-sm">
+            {label(
+              'Online card payment is not active yet. Choose cash or transfer until a Jordan-supported provider is configured.',
+              'الدفع بالبطاقة غير متاح حالياً. اختر الدفع النقدي أو
+          
