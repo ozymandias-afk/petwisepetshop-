@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { useCart } from '@/components/cart-provider'
-import { useLanguage } from '@/components/language-provider'
+import { useCart } from '@/components/ui/cart-provider'
+import { useLanguage } from '@/components/ui/language-provider'
 import { formatPrice } from '@/lib/i18n'
 
 export default function CheckoutPage() {
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
                     setTransferScreenshot(String(reader.result || ''))
                   reader.readAsDataURL(f)
                 }}
-                className="font-normal"
+                className="font-normal file:me-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-red-600 file:px-4 file:py-2 file:font-bold file:text-white hover:file:bg-red-700"
               />
             </label>
           </div>
@@ -269,4 +269,53 @@ export default function CheckoutPage() {
           <p className="rounded-xl bg-accent p-4 text-sm">
             {label(
               'Online card payment is not active yet. Choose cash or transfer until a Jordan-supported provider is configured.',
-'الدفع بالبطاقة غير متاح حالياً. اختر الدفع النقدي أو التحويل حتى يتم إعداد مزوّد دفع يدعم الأردن.',
+              'الدفع بالبطاقة غير متاح حالياً. اختر الدفع النقدي أو التحويل حتى يتم إعداد مزوّد دفع يدعم الأردن.'
+            )}
+          </p>
+        )}
+
+        {/* Hidden spam-trap field: real customers never see or fill it */}
+        <input
+          name="website"
+          value={form.website}
+          onChange={change}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="hidden"
+        />
+
+        {error && (
+          <p className="rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading || form.paymentMethod === 'card'}
+          className="rounded-full bg-primary px-6 py-3 font-bold text-white disabled:opacity-60"
+        >
+          {loading
+            ? label('Placing order…', 'جاري إرسال الطلب…')
+            : label('Place order', 'تأكيد الطلب')}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+function Field({
+  label,
+  ...props
+}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="mt-3 grid gap-2 text-sm font-bold first:mt-0">
+      {label}
+      <input
+        {...props}
+        className="rounded-xl border border-input bg-background p-3 font-normal"
+      />
+    </label>
+  )
+}
