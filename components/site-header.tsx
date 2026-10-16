@@ -171,7 +171,7 @@ export function SiteHeader() {
       >
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-extrabold">
-            {lang === 'ar' ? 'سلة التسوق' : 'Shopping cart'} ({count})
+               {lang === 'ar' ? 'سلة التسوق TEST' : 'Shopping cart TEST'} ({count})
           </h2>
           <button
             type="button"
