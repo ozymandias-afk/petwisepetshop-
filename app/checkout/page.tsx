@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
-import { useCart } from '@/components/ui/cart-provider'
+import { useCart } from '@/components/cart-provider'
+import { useLanguage } from '@/components/language-provider'
 import { useLanguage } from '@/components/ui/language-provider'
 import { formatPrice } from '@/lib/i18n'
 
