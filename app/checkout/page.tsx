@@ -269,5 +269,4 @@ export default function CheckoutPage() {
           <p className="rounded-xl bg-accent p-4 text-sm">
             {label(
               'Online card payment is not active yet. Choose cash or transfer until a Jordan-supported provider is configured.',
-              'الدفع بالبطاقة غير متاح حالياً. اختر الدفع النقدي أو
-          
+'الدفع بالبطاقة غير متاح حالياً. اختر الدفع النقدي أو التحويل حتى يتم إعداد مزوّد دفع يدعم الأردن.',
