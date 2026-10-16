@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -23,6 +24,12 @@ export function SiteHeader() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // The cart is drawn on document.body (a "portal"), which only exists in the browser
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Close the cart with the Escape key, and stop the page behind from scrolling while it is open
   useEffect(() => {
@@ -136,6 +143,9 @@ export function SiteHeader() {
         so a cart placed inside it can never cover the whole screen.
       */}
 
+      {mounted &&
+        createPortal(
+          <>
       {/* Backdrop overlay */}
       <div
         onClick={() => setCartOpen(false)}
@@ -241,6 +251,9 @@ export function SiteHeader() {
           </Link>
         </div>
       </aside>
+          </>,
+          document.body,
+        )}
     </>
   )
 }
