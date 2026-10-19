@@ -73,7 +73,9 @@ export default function AdminPage() {
 
   async function refresh() {
     if (!supabase) return
-    const [o, p, c, ann] = await Promise.all([
+
+    // 1. Fetch core store data (Orders, Products, Customers)
+    const [o, p, c] = await Promise.all([
       supabase
         .from('orders')
         .select('*,customers(name,phone,email),order_items(*)')
@@ -85,8 +87,32 @@ export default function AdminPage() {
         .select('*,orders(total,status,order_number)')
         .order('created_at', { ascending: false })
         .limit(500),
-      supabase.from('announcements').select('*').eq('id', 1).single(),
     ])
+
+    if (o.error) setError(o.error.message)
+    else setOrders(o.data || [])
+
+    if (p.error) setError(p.error.message)
+    else setProducts(p.data || [])
+
+    if (c.error) setError(c.error.message)
+    else setCustomers(c.data || [])
+
+    // 2. Fetch announcements separately so it never breaks product rendering
+    const { data: annData } = await supabase
+      .from('announcements')
+      .select('*')
+      .eq('id', 1)
+      .maybeSingle()
+
+    if (annData) {
+      setAnnouncement({
+        text_en: annData.text_en || '',
+        text_ar: annData.text_ar || '',
+        active: annData.active ?? true,
+      })
+    }
+  }
 
     if (o.error) setError(o.error.message)
     else setOrders(o.data || [])
