@@ -296,20 +296,20 @@ export default function AdminPage() {
 
       {/* PRODUCTS */}
       {tab === 'products' && (
-        <section className="mt-5 grid gap-6 lg:grid-cols-2">
-          <form onSubmit={saveProduct} className="grid gap-3 rounded-2xl border bg-card p-4">
+        <section className="mt-5 grid items-start gap-6 lg:grid-cols-2">
+          <form onSubmit={saveProduct} className="flex flex-col gap-3 rounded-2xl border bg-card p-4">
             <h2 className="text-xl font-bold">{ar ? 'إضافة / تعديل منتج' : 'Add / edit product'}</h2>
 
-            <input required placeholder="slug" value={draft.slug} onChange={e => setDraft(v => ({ ...v, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))} className="rounded-xl border bg-background p-3" />
-            <input required placeholder="Name (English)" value={draft.name.en} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, en: e.target.value } }))} className="rounded-xl border bg-background p-3" />
-            <input required placeholder="الاسم بالعربية" value={draft.name.ar} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, ar: e.target.value } }))} className="rounded-xl border bg-background p-3" />
+            <input required placeholder="slug" value={draft.slug} onChange={e => setDraft(v => ({ ...v, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))} className="h-11 rounded-xl border bg-background p-3" />
+            <input required placeholder="Name (English)" value={draft.name.en} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, en: e.target.value } }))} className="h-11 rounded-xl border bg-background p-3" />
+            <input required placeholder="الاسم بالعربية" value={draft.name.ar} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, ar: e.target.value } }))} className="h-11 rounded-xl border bg-background p-3" />
             <textarea required placeholder="Description (English)" value={draft.description.en} onChange={e => setDraft(v => ({ ...v, description: { ...v.description, en: e.target.value } }))} className="rounded-xl border bg-background p-3" />
             <textarea required placeholder="الوصف بالعربية" value={draft.description.ar} onChange={e => setDraft(v => ({ ...v, description: { ...v.description, ar: e.target.value } }))} className="rounded-xl border bg-background p-3" />
 
             <div className="grid grid-cols-3 gap-2">
-              <input required type="number" min="0" step=".01" placeholder="Price JOD" value={draft.price} onChange={e => setDraft(v => ({ ...v, price: Number(e.target.value) }))} className="min-w-0 rounded-xl border bg-background p-2" />
-              <input required type="number" min="0" placeholder="Stock" value={draft.stock} onChange={e => setDraft(v => ({ ...v, stock: Number(e.target.value) }))} className="min-w-0 rounded-xl border bg-background p-2" />
-              <select value={draft.category} onChange={e => setDraft(v => ({ ...v, category: e.target.value }))} className="min-w-0 rounded-xl border bg-background p-2">
+              <input required type="number" min="0" step=".01" placeholder="Price JOD" value={draft.price} onChange={e => setDraft(v => ({ ...v, price: Number(e.target.value) }))} className="min-w-0 h-11 rounded-xl border bg-background p-2" />
+              <input required type="number" min="0" placeholder="Stock" value={draft.stock} onChange={e => setDraft(v => ({ ...v, stock: Number(e.target.value) }))} className="min-w-0 h-11 rounded-xl border bg-background p-2" />
+              <select value={draft.category} onChange={e => setDraft(v => ({ ...v, category: e.target.value }))} className="min-w-0 h-11 rounded-xl border bg-background p-2">
                 {['dog', 'cat', 'birds', 'fish', 'small-pets', 'accessories'].map(x => <option key={x}>{x}</option>)}
               </select>
             </div>
