@@ -43,8 +43,7 @@ const PAYMENT_STATUSES = ['Pending', 'Paid', 'Failed', 'Refunded']
 export default function AdminPage() {
   const { lang } = useLanguage()
   const ar = lang === 'ar'
-  
-  const [announcement, setAnnouncement] = useState({ text_en: '', text_ar: '', active: true })
+
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
   const [session, setSession] = useState<any>(null)
   const [email, setEmail] = useState('')
@@ -58,6 +57,7 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [draft, setDraft] = useState<ProductRow>(blankDraft())
+  const [announcement, setAnnouncement] = useState({ text_en: '', text_ar: '', active: true })
 
   useEffect(() => {
     const s = getClient()
@@ -73,7 +73,7 @@ export default function AdminPage() {
 
   async function refresh() {
     if (!supabase) return
-    const [o, p, c] = await Promise.all([
+    const [o, p, c, ann] = await Promise.all([
       supabase
         .from('orders')
         .select('*,customers(name,phone,email),order_items(*)')
@@ -85,13 +85,22 @@ export default function AdminPage() {
         .select('*,orders(total,status,order_number)')
         .order('created_at', { ascending: false })
         .limit(500),
+      supabase.from('announcements').select('*').eq('id', 1).single(),
     ])
+
     if (o.error) setError(o.error.message)
     else setOrders(o.data || [])
     if (p.error) setError(p.error.message)
     else setProducts(p.data || [])
     if (c.error) setError(c.error.message)
     else setCustomers(c.data || [])
+    if (ann.data) {
+      setAnnouncement({
+        text_en: ann.data.text_en || '',
+        text_ar: ann.data.text_ar || '',
+        active: ann.data.active ?? true,
+      })
+    }
   }
 
   useEffect(() => {
@@ -123,6 +132,25 @@ export default function AdminPage() {
       setDraft(blankDraft())
       await refresh()
     }
+    setBusy(false)
+  }
+
+  async function saveAnnouncement(e: React.FormEvent) {
+    e.preventDefault()
+    if (!supabase) return
+    setBusy(true)
+    setError('')
+
+    const { error } = await supabase.from('announcements').upsert({
+      id: 1,
+      text_en: announcement.text_en,
+      text_ar: announcement.text_ar,
+      active: announcement.active,
+      updated_at: new Date().toISOString(),
+    })
+
+    if (error) setError(error.message)
+    else alert(ar ? 'تم حفظ الإعلان!' : 'Announcement updated!')
     setBusy(false)
   }
 
@@ -194,6 +222,7 @@ export default function AdminPage() {
     ['products', ar ? 'المنتجات' : 'Products'],
     ['customers', ar ? 'العملاء' : 'Customers'],
     ['shifts', ar ? 'الورديات' : 'Shifts'],
+    ['announcements', ar ? 'الإعلانات' : 'Announcements'],
   ]
 
   return (
@@ -452,6 +481,51 @@ export default function AdminPage() {
 
       {/* SHIFTS (employees) */}
       {tab === 'shifts' && <ShiftsPanel supabase={supabase} ar={ar} />}
+
+      {/* ANNOUNCEMENTS */}
+      {tab === 'announcements' && (
+        <section className="mt-5 max-w-2xl">
+          <form onSubmit={saveAnnouncement} className="flex flex-col gap-4 rounded-2xl border bg-card p-6">
+            <h2 className="text-xl font-bold">{ar ? 'شريط الإعلانات العلوية' : 'Homepage Banner Announcement'}</h2>
+            
+            <div>
+              <label className="block text-sm font-semibold mb-1">{ar ? 'النص بالإنجليزية' : 'English Text'}</label>
+              <input
+                type="text"
+                value={announcement.text_en}
+                onChange={e => setAnnouncement(v => ({ ...v, text_en: e.target.value }))}
+                placeholder="e.g. 20% OFF all cat food this week!"
+                className="w-full h-11 rounded-xl border bg-background p-3 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-1">{ar ? 'النص بالعربية' : 'Arabic Text'}</label>
+              <input
+                type="text"
+                value={announcement.text_ar}
+                onChange={e => setAnnouncement(v => ({ ...v, text_ar: e.target.value }))}
+                placeholder="مثال: خصم 20% على جميع أطعمة القطط هذا الأسبوع!"
+                className="w-full h-11 rounded-xl border bg-background p-3 text-sm"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
+              <input
+                type="checkbox"
+                checked={announcement.active}
+                onChange={e => setAnnouncement(v => ({ ...v, active: e.target.checked }))}
+                className="size-4 rounded"
+              />
+              {ar ? 'تفعيل ظهور الشريط في الصفحة الرئيسية' : 'Show banner on homepage'}
+            </label>
+
+            <button disabled={busy} className="mt-2 rounded-full bg-primary p-3 font-bold text-white">
+              {ar ? 'حفظ الإعلان' : 'Save Announcement'}
+            </button>
+          </form>
+        </section>
+      )}
     </Wrap>
   )
 }
