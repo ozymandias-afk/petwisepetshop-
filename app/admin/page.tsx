@@ -43,7 +43,8 @@ const PAYMENT_STATUSES = ['Pending', 'Paid', 'Failed', 'Refunded']
 export default function AdminPage() {
   const { lang } = useLanguage()
   const ar = lang === 'ar'
-
+  
+  const [announcement, setAnnouncement] = useState({ text_en: '', text_ar: '', active: true })
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
   const [session, setSession] = useState<any>(null)
   const [email, setEmail] = useState('')
