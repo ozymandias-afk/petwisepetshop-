@@ -57,7 +57,7 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [draft, setDraft] = useState<ProductRow>(blankDraft())
-  const [announcement, setAnnouncement] = useState({ text_en: '', text_ar: '', active: true })
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     const s = getClient()
@@ -73,8 +73,6 @@ export default function AdminPage() {
 
   async function refresh() {
     if (!supabase) return
-
-    // 1. Core store data
     const [o, p, c] = await Promise.all([
       supabase
         .from('orders')
@@ -88,30 +86,12 @@ export default function AdminPage() {
         .order('created_at', { ascending: false })
         .limit(500),
     ])
-
     if (o.error) setError(o.error.message)
     else setOrders(o.data || [])
-
     if (p.error) setError(p.error.message)
     else setProducts(p.data || [])
-
     if (c.error) setError(c.error.message)
     else setCustomers(c.data || [])
-
-    // 2. Fetch announcements safely without breaking store data
-    const { data: annData } = await supabase
-      .from('announcements')
-      .select('*')
-      .eq('id', 1)
-      .maybeSingle()
-
-    if (annData) {
-      setAnnouncement({
-        text_en: annData.text_en || '',
-        text_ar: annData.text_ar || '',
-        active: annData.active ?? true,
-      })
-    }
   }
 
   useEffect(() => {
@@ -143,25 +123,6 @@ export default function AdminPage() {
       setDraft(blankDraft())
       await refresh()
     }
-    setBusy(false)
-  }
-
-  async function saveAnnouncement(e: React.FormEvent) {
-    e.preventDefault()
-    if (!supabase) return
-    setBusy(true)
-    setError('')
-
-    const { error } = await supabase.from('announcements').upsert({
-      id: 1,
-      text_en: announcement.text_en,
-      text_ar: announcement.text_ar,
-      active: announcement.active,
-      updated_at: new Date().toISOString(),
-    })
-
-    if (error) setError(error.message)
-    else alert(ar ? 'تم حفظ الإعلان!' : 'Announcement updated!')
     setBusy(false)
   }
 
@@ -203,6 +164,35 @@ export default function AdminPage() {
     return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || '—'
   })()
 
+  // Search: one box that filters whichever tab is open
+  const q = query.trim().toLowerCase()
+  const matches = (...parts: unknown[]) => !q || parts.some(p => String(p ?? '').toLowerCase().includes(q))
+
+  const filteredOrders = orders.filter(
+    o =>
+      (statusFilter === 'all' || o.status === statusFilter) &&
+      (paymentFilter === 'all' || o.payment_status === paymentFilter) &&
+      matches(
+        o.order_number,
+        o.customers?.name,
+        o.customers?.phone,
+        o.payment_method,
+        o.delivery_city,
+        (o.order_items || [])
+          .map((i: any) => (typeof i.product_name === 'object' ? `${i.product_name?.en} ${i.product_name?.ar}` : i.product_name))
+          .join(' '),
+      ),
+  )
+  const filteredProducts = products.filter(p => matches(p.name?.en, p.name?.ar, p.slug, p.category))
+  const filteredCustomers = customers.filter(c => matches(c.name, c.phone, c.email))
+  const resultCount = tab === 'orders' ? filteredOrders.length : tab === 'products' ? filteredProducts.length : filteredCustomers.length
+  const searchPlaceholder =
+    tab === 'orders'
+      ? ar ? 'ابحث في الطلبات: الرقم، الاسم، الهاتف، المنتج…' : 'Search orders: number, name, phone, product…'
+      : tab === 'products'
+        ? ar ? 'ابحث في المنتجات: الاسم، الفئة…' : 'Search products: name, slug, category…'
+        : ar ? 'ابحث في العملاء: الاسم، الهاتف، البريد…' : 'Search customers: name, phone, email…'
+
   if (!supabase)
     return (
       <Wrap ar={ar}>
@@ -233,7 +223,6 @@ export default function AdminPage() {
     ['products', ar ? 'المنتجات' : 'Products'],
     ['customers', ar ? 'العملاء' : 'Customers'],
     ['shifts', ar ? 'الورديات' : 'Shifts'],
-    ['announcements', ar ? 'الإعلانات' : 'Announcements'],
   ]
 
   return (
@@ -247,11 +236,34 @@ export default function AdminPage() {
 
       <div className="mt-6 flex flex-wrap gap-2">
         {tabs.map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} className={`rounded-full px-4 py-2 font-bold ${tab === id ? 'bg-primary text-white' : 'border'}`}>
+          <button key={id} onClick={() => { setTab(id); setQuery('') }} className={`rounded-full px-4 py-2 font-bold ${tab === id ? 'bg-primary text-white' : 'border'}`}>
             {label}
           </button>
         ))}
       </div>
+
+      {tab !== 'shifts' && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
+            className="w-full max-w-md rounded-full border bg-background px-4 py-2"
+          />
+          {query && (
+            <button onClick={() => setQuery('')} className="rounded-full border px-3 py-2 text-sm">
+              {ar ? 'مسح' : 'Clear'}
+            </button>
+          )}
+          {q && (
+            <span className="text-sm text-muted-foreground">
+              {resultCount} {ar ? 'نتيجة' : resultCount === 1 ? 'result' : 'results'}
+            </span>
+          )}
+        </div>
+      )}
 
       {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-red-700">{error}</p>}
 
@@ -285,9 +297,7 @@ export default function AdminPage() {
           </div>
 
           <div className="space-y-3">
-            {orders
-              .filter(o => (statusFilter === 'all' || o.status === statusFilter) && (paymentFilter === 'all' || o.payment_status === paymentFilter))
-              .map(o => (
+            {filteredOrders.map(o => (
                 <article key={o.id} className="rounded-2xl border bg-card p-4">
                   <div className="flex flex-wrap justify-between gap-2">
                     <div>
@@ -330,27 +340,31 @@ export default function AdminPage() {
                   </ul>
                 </article>
               ))}
-            {!orders.length && <p className="py-8 text-muted-foreground">{ar ? 'لا توجد طلبات.' : 'No orders yet.'}</p>}
+            {!filteredOrders.length && (
+              <p className="py-8 text-muted-foreground">
+                {orders.length ? (ar ? 'لا توجد نتائج.' : 'No matching orders.') : ar ? 'لا توجد طلبات.' : 'No orders yet.'}
+              </p>
+            )}
           </div>
         </section>
       )}
 
       {/* PRODUCTS */}
       {tab === 'products' && (
-        <section className="mt-5 grid items-start gap-6 lg:grid-cols-2">
-          <form onSubmit={saveProduct} className="flex flex-col gap-3 rounded-2xl border bg-card p-4">
+        <section className="mt-5 grid gap-6 lg:grid-cols-2">
+          <form onSubmit={saveProduct} className="grid content-start gap-3 self-start rounded-2xl border bg-card p-4 lg:sticky lg:top-24">
             <h2 className="text-xl font-bold">{ar ? 'إضافة / تعديل منتج' : 'Add / edit product'}</h2>
 
-            <input required placeholder="slug" value={draft.slug} onChange={e => setDraft(v => ({ ...v, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))} className="h-11 rounded-xl border bg-background p-3" />
-            <input required placeholder="Name (English)" value={draft.name.en} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, en: e.target.value } }))} className="h-11 rounded-xl border bg-background p-3" />
-            <input required placeholder="الاسم بالعربية" value={draft.name.ar} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, ar: e.target.value } }))} className="h-11 rounded-xl border bg-background p-3" />
+            <input required placeholder="slug" value={draft.slug} onChange={e => setDraft(v => ({ ...v, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))} className="rounded-xl border bg-background p-3" />
+            <input required placeholder="Name (English)" value={draft.name.en} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, en: e.target.value } }))} className="rounded-xl border bg-background p-3" />
+            <input required placeholder="الاسم بالعربية" value={draft.name.ar} onChange={e => setDraft(v => ({ ...v, name: { ...v.name, ar: e.target.value } }))} className="rounded-xl border bg-background p-3" />
             <textarea required placeholder="Description (English)" value={draft.description.en} onChange={e => setDraft(v => ({ ...v, description: { ...v.description, en: e.target.value } }))} className="rounded-xl border bg-background p-3" />
             <textarea required placeholder="الوصف بالعربية" value={draft.description.ar} onChange={e => setDraft(v => ({ ...v, description: { ...v.description, ar: e.target.value } }))} className="rounded-xl border bg-background p-3" />
 
             <div className="grid grid-cols-3 gap-2">
-              <input required type="number" min="0" step=".01" placeholder="Price JOD" value={draft.price} onChange={e => setDraft(v => ({ ...v, price: Number(e.target.value) }))} className="min-w-0 h-11 rounded-xl border bg-background p-2" />
-              <input required type="number" min="0" placeholder="Stock" value={draft.stock} onChange={e => setDraft(v => ({ ...v, stock: Number(e.target.value) }))} className="min-w-0 h-11 rounded-xl border bg-background p-2" />
-              <select value={draft.category} onChange={e => setDraft(v => ({ ...v, category: e.target.value }))} className="min-w-0 h-11 rounded-xl border bg-background p-2">
+              <input required type="number" min="0" step=".01" placeholder="Price JOD" value={draft.price} onChange={e => setDraft(v => ({ ...v, price: Number(e.target.value) }))} className="min-w-0 rounded-xl border bg-background p-2" />
+              <input required type="number" min="0" placeholder="Stock" value={draft.stock} onChange={e => setDraft(v => ({ ...v, stock: Number(e.target.value) }))} className="min-w-0 rounded-xl border bg-background p-2" />
+              <select value={draft.category} onChange={e => setDraft(v => ({ ...v, category: e.target.value }))} className="min-w-0 rounded-xl border bg-background p-2">
                 {['dog', 'cat', 'birds', 'fish', 'small-pets', 'accessories'].map(x => <option key={x}>{x}</option>)}
               </select>
             </div>
@@ -388,7 +402,10 @@ export default function AdminPage() {
           </form>
 
           <div className="space-y-3">
-            {products.map(p => (
+            {!filteredProducts.length && (
+              <p className="py-4 text-muted-foreground">{ar ? 'لا توجد نتائج.' : 'No matching products.'}</p>
+            )}
+            {filteredProducts.map(p => (
               <article key={p.id || p.slug} className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-3">
                 <div>
                   <p className="font-bold">{p.name?.en || p.slug}</p>
@@ -456,7 +473,10 @@ export default function AdminPage() {
           </p>
 
           <div className="mt-4 space-y-3">
-            {customers.map(c => (
+            {!filteredCustomers.length && (
+              <p className="py-4 text-muted-foreground">{ar ? 'لا توجد نتائج.' : 'No matching customers.'}</p>
+            )}
+            {filteredCustomers.map(c => (
               <article key={c.id} className="rounded-2xl border bg-card p-4">
                 <div className="flex flex-wrap justify-between gap-2">
                   <div>
@@ -492,51 +512,6 @@ export default function AdminPage() {
 
       {/* SHIFTS (employees) */}
       {tab === 'shifts' && <ShiftsPanel supabase={supabase} ar={ar} />}
-
-      {/* ANNOUNCEMENTS */}
-      {tab === 'announcements' && (
-        <section className="mt-5 max-w-2xl">
-          <form onSubmit={saveAnnouncement} className="flex flex-col gap-4 rounded-2xl border bg-card p-6">
-            <h2 className="text-xl font-bold">{ar ? 'شريط الإعلانات العلوية' : 'Homepage Banner Announcement'}</h2>
-            
-            <div>
-              <label className="block text-sm font-semibold mb-1">{ar ? 'النص بالإنجليزية' : 'English Text'}</label>
-              <input
-                type="text"
-                value={announcement.text_en}
-                onChange={e => setAnnouncement(v => ({ ...v, text_en: e.target.value }))}
-                placeholder="e.g. 20% OFF all cat food this week!"
-                className="w-full h-11 rounded-xl border bg-background p-3 text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1">{ar ? 'النص بالعربية' : 'Arabic Text'}</label>
-              <input
-                type="text"
-                value={announcement.text_ar}
-                onChange={e => setAnnouncement(v => ({ ...v, text_ar: e.target.value }))}
-                placeholder="مثال: خصم 20% على جميع أطعمة القطط هذا الأسبوع!"
-                className="w-full h-11 rounded-xl border bg-background p-3 text-sm"
-              />
-            </div>
-
-            <label className="flex items-center gap-2 cursor-pointer font-medium text-sm">
-              <input
-                type="checkbox"
-                checked={announcement.active}
-                onChange={e => setAnnouncement(v => ({ ...v, active: e.target.checked }))}
-                className="size-4 rounded"
-              />
-              {ar ? 'تفعيل ظهور الشريط في الصفحة الرئيسية' : 'Show banner on homepage'}
-            </label>
-
-            <button disabled={busy} className="mt-2 rounded-full bg-primary p-3 font-bold text-white">
-              {ar ? 'حفظ الإعلان' : 'Save Announcement'}
-            </button>
-          </form>
-        </section>
-      )}
     </Wrap>
   )
 }
