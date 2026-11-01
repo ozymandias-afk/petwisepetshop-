@@ -30,10 +30,6 @@ export function Hero() {
               {t.hero.shop}
               <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
             </Link>
-            <Link href={`/${lang}/services`} className={pillButton({ variant: 'outline', size: 'lg' })}>
-              <Stethoscope aria-hidden="true" />
-              {t.hero.book}
-            </Link>
           </div>
           <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
             <BadgeCheck className="size-5 text-primary" aria-hidden="true" />
