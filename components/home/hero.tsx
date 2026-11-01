@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, BadgeCheck, Clock, Stethoscope } from 'lucide-react'
 import { pillButton } from '@/lib/styles'
 import { useLanguage } from '../language-provider'
 
