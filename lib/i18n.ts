@@ -54,7 +54,6 @@ const en = {
     subtitle:
       'Premium food, trusted brands, cozy accessories and caring vet and grooming services, all under one roof on Rafaa Shammout Street.',
     shop: 'Shop Products',
-    book: 'Book a Vet Visit',
     imageAlt: 'The PetWise shop front in Amman with shelves full of pet products',
     openDaily: 'Open daily',
     hours: '10:00 AM - 12:00 AM',
@@ -245,7 +244,6 @@ const ar: Dictionary = {
     subtitle:
       'طعام فاخر، علامات تجارية موثوقة، إكسسوارات مريحة، وخدمات بيطرية وتجميل بكل حب، كلها تحت سقف واحد في شارع رفعة شموط.',
     shop: 'تسوق المنتجات',
-    book: 'احجز زيارة بيطرية',
     imageAlt: 'واجهة متجر PetWise في عمّان مع رفوف مليئة بمنتجات الحيوانات الأليفة',
     openDaily: 'مفتوح يوميًا',
     hours: '10:00 صباحًا - 12:00 منتصف الليل',
