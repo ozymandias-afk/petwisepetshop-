@@ -45,6 +45,33 @@ export async function POST(req: Request) {
     const current=Number(item.product.stock)
     await supabase.from('products').update({stock:Math.max(0,current-item.quantity)}).eq('slug',item.product.slug)
   }
+
+  // --- Discord Order Notification Trigger ---
+  try {
+    await supabase.functions.invoke('send-discord-order', {
+      body: {
+        orderNumber,
+        customerName: body.name,
+        phone: body.phone,
+        email: body.email,
+        deliveryType: body.deliveryType,
+        paymentMethod: body.paymentMethod,
+        city: body.city,
+        address: body.address,
+        notes: body.notes,
+        total,
+        items: cleanItems.map(i => ({
+          name: i.product.name.en || i.product.name.ar || 'Product',
+          quantity: i.quantity,
+          price: i.product.price
+        }))
+      }
+    })
+  } catch (discordErr) {
+    console.error('Discord notification failed (non-blocking):', discordErr)
+  }
+  // ----------------------------------------
+
   const lang=body.lang==='en'?'en':'ar';const base=(process.env.NEXT_PUBLIC_SITE_URL||'https://petwise-jo.netlify.app').replace(/\/$/,'')
   const summary=cleanItems.map(i=>`• ${i.product.name[lang]} × ${i.quantity} — ${(i.product.price*i.quantity).toFixed(2)} JOD\n${base}/${lang}/shop/${i.product.slug}`).join('\n')
   const adminMessage=`New PetWise order ${orderNumber}\nCustomer: ${body.name}\nPhone: ${body.phone}\nEmail: ${body.email||'-'}\nDelivery: ${body.deliveryType}\nPayment: ${body.paymentMethod}\n${summary}\nTotal: ${total.toFixed(2)} JOD\nAddress: ${body.city}, ${body.address}\nNotes: ${body.notes||'-'}`
