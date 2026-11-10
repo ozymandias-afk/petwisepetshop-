@@ -53,7 +53,7 @@ export function ProductDetail({ slug, product: suppliedProduct, allProducts = fa
                    <p className="text-sm font-semibold">{(product.stock ?? 20) > 0 ? (lang === 'ar' ? 'متوفر' : 'In stock') : (lang === 'ar' ? 'غير متوفر حالياً' : 'Out of stock')}</p>
           <div className="flex items-center gap-3">
             <label htmlFor="product-quantity" className="text-sm font-bold">{lang === 'ar' ? 'الكمية' : 'Quantity'}</label>
-            <input id="product-quantity" type="number" min={1} max={(product.stock ?? 99) > 0 ? product.stock ?? 99 : 1} value={quantity} onChange={e => setQuantity(Math.max(1, Math.min((product.stock ?? 99) > 0 ? product.stock ?? 99 : 1, Number(e.target.value) || 1)))} className="w-20 rounded-xl border border-input bg-card p-2 text-center" />
+                        <input id="product-quantity" type="number" min={1} max={20} value={quantity} onChange={e => setQuantity(Math.max(1, Math.min(20, Number(e.target.value) || 1)))} className="w-20 rounded-xl border border-input bg-card p-2 text-center" />
             <button type="button" disabled={(product.stock ?? 20) <= 0} onClick={() => add(product, quantity)} className={pillButton({variant:'outline',size:'lg'})}><ShoppingCart className="size-4" />{lang === 'ar' ? 'أضف إلى السلة' : 'Add to cart'}</button>
           </div>
           <a
