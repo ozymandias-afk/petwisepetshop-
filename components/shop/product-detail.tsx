@@ -50,7 +50,7 @@ export function ProductDetail({ slug, product: suppliedProduct, allProducts = fa
           <h1 className="text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">{name}</h1>
           <p className="text-3xl font-extrabold text-primary">{formatPrice(product.price, lang)}</p>
           <p className="text-base leading-relaxed text-muted-foreground">{product.description[lang]}</p>
-          <p className="text-sm font-semibold">{(product.stock ?? 20) > 0 ? (lang === 'ar' ? `متوفر (${product.stock ?? 20})` : `In stock (${product.stock ?? 20})`) : (lang === 'ar' ? 'غير متوفر حالياً' : 'Out of stock')}</p>
+                   <p className="text-sm font-semibold">{(product.stock ?? 20) > 0 ? (lang === 'ar' ? 'متوفر' : 'In stock') : (lang === 'ar' ? 'غير متوفر حالياً' : 'Out of stock')}</p>
           <div className="flex items-center gap-3">
             <label htmlFor="product-quantity" className="text-sm font-bold">{lang === 'ar' ? 'الكمية' : 'Quantity'}</label>
             <input id="product-quantity" type="number" min={1} max={(product.stock ?? 99) > 0 ? product.stock ?? 99 : 1} value={quantity} onChange={e => setQuantity(Math.max(1, Math.min((product.stock ?? 99) > 0 ? product.stock ?? 99 : 1, Number(e.target.value) || 1)))} className="w-20 rounded-xl border border-input bg-card p-2 text-center" />
